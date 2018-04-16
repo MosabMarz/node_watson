@@ -10,4 +10,6 @@ module.exports = function(app) {
         .post(messages.message)
     app.route('/feedback')
         .post(messages.feedback)
+    app.route('/feedback')
+        .get(messages.feedback_example)
 };

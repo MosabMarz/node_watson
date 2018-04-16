@@ -1,0 +1,27 @@
+initial commit
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+#
+# Initial commit
+#
+# Changes to be committed:
+#	new file:   api/controllers/messageController.js
+#	new file:   api/controllers/miscController.ts
+#	new file:   api/controllers/slackController.js
+#	new file:   api/models/auth.js
+#	new file:   api/models/messageModel.js
+#	new file:   api/models/myTypes.ts
+#	new file:   api/routes/messageRoutes.js
+#	new file:   index.js
+#	new file:   package-lock.json
+#	new file:   package.json
+#	new file:   readme.md
+#	new file:   server.js
+#	new file:   server.ts
+#	new file:   tsconfig.json
+#
+# Untracked files:
+#	.gitignore
+#

@@ -16,12 +16,11 @@ module.exports = {
         password: "<PASSWORD >",
         version: 'v2'
     },
-    conversation:
-    {
-        version_date: '2018-02-16',
-        url: "https://gateway.watsonplatform.net/conversation/api",
+    conversation: {
+        version: '2018-02-16',
+        url: "https://gateway.watsonplatform.net/assistant/api",
         username: "a4bff775-6c9d-496a-ab83-10bae557affe",
         password: "NkEmEczX01P8"
-      }
+    }
     //,...
 };

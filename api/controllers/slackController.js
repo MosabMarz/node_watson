@@ -6,6 +6,7 @@ const { RTMClient } = require('@slack/client');
 var axios = require('axios'); //the variable doesn't necessarily have to be named http
 var learningMode = false;
 var lowConReplies;
+var lastMessage = "";
 // Get an API token by creating an app at <https://api.slack.com/apps?new_app=1>
 // It's always a good idea to keep sensitive data like the token outside your source code. Prefer environment variables.
 const token = process.env.SLACK_API_TOKEN || 'xoxb-345218093776-RnQJsyZPklXsroKauzQAMYd4';
@@ -13,41 +14,67 @@ if (!token) {
     console.log('You must specify a token to use this example');
     process.exitCode = 1;
 }
-console.log("slack controller is in da house!")
-    // Initialize an RTM API client
+
+// Initialize an RTM API client
 const rtm = new RTMClient(token);
 // Start the connection to the platform
 rtm.start();
 // Log all incoming messages
 rtm.on('message', (message) => {
     if (learningMode) {
-
+        var feedback = lowConReplies[parseInt(message.text)];
+        if (feedback != null) {
+            feedbackWatson(feedback, message);
+        } else {
+            rtm.sendMessage("failed to add feedback , fire Mos'ab", message.channel);
+        }
     } else {
         messageWatson(message);
     }
 })
 
-var messageWatson = function(message) {
-        /*made as api call because slack bot is just an intermediate state, 
-        we can't change the code relying on it as primary input*/
-        axios.post('http://localhost:3001/message', {
-                message: message.text
-            })
-            .then(function(response) {
-                if (response.data.trustedReply == true) {
-                    rtm.sendMessage(response.data.reply + "\nC: " +
-                        response.data.confidence + "\nIntent: " +
-                        response.data.intent, message.channel);
-                } else {
-                    learningMode = true;
-                    lowConReplies = response.data.replies;
+var feedbackWatson = function(feedback, message) {
+    console.log("message : " + lastMessage);
+    console.log("intent : " + feedback.intent);
+    axios.post('http://localhost:3001/feedback', {
+            message: lastMessage,
+            intent: feedback.intent
+        })
+        .then(function() {
+            clearEnv();
+            rtm.sendMessage("feedback added , thank you!", message.channel);
 
-                    rtm.sendMessage(getStringFromRepliesArray(lowConReplies), message.channel);
-                }
-            })
-            .catch(function(error) {
-                rtm.sendMessage("no intent with enough confidence 75%", message.channel);
-            });
+        })
+        .catch(function(error) {
+            rtm.sendMessage("failed to add feedback , fire Mos'ab", message.channel);
+        });
+}
+var messageWatson = function(message) {
+    /*made as api call because slack bot is just an intermediate state, 
+    we can't change the code relying on it as primary input*/
+    axios.post('http://localhost:3001/message', {
+            message: message.text
+        })
+        .then(function(response) {
+            if (response.data.trustedReply == true) {
+                rtm.sendMessage(response.data.reply + "\nC: " +
+                    response.data.confidence + "\nIntent: " +
+                    response.data.intent, message.channel);
+            } else {
+                learningMode = true;
+                lowConReplies = response.data.replies;
+                lastMessage = message.text;
+                rtm.sendMessage(getStringFromRepliesArray(lowConReplies), message.channel);
+            }
+        })
+        .catch(function(error) {
+            rtm.sendMessage("no intent with enough confidence 75%", message.channel);
+        });
+}
+var clearEnv = function() {
+        learningMode = false;
+        lowConReplies = [];
+        lastMessage = "";
     }
     // Log all reactions
 rtm.on('reaction_added', (event) => {

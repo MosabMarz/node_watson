@@ -3,13 +3,14 @@
 
 var watson = require('watson-developer-cloud');
 var auth = require('../models/auth.js'); // you'll have to edit this file to include your credentials
-var assistant = new watson.ConversationV1(auth.conversation)
+var assistant = new watson.AssistantV1(auth.conversation);
+const workspace_id = '220d6c23-754f-49d3-9fd0-7b9216f8e7ff';
 
 
 exports.message = function(req, res) {
     let message = req.body.message;
     assistant.message({
-        workspace_id: '220d6c23-754f-49d3-9fd0-7b9216f8e7ff',
+        workspace_id: workspace_id,
         input: { 'text': message },
         alternate_intents: true
     }, function(err, response) {
@@ -58,8 +59,43 @@ exports.message = function(req, res) {
     });
 }
 exports.feedback = function(req, res) {
+    console.log("feedback here");
     let message = req.body.message;
+    let intent = req.body.intent;
 
+    let params = {
+        workspace_id: workspace_id,
+        intent: intent,
+        text: message
+    }
+    assistant.createExample(params,
+        function(err, response) {
+            if (err) {
+                console.log(err);
+
+                res.status(404);
+                res.send();
+            } else {
+                console.log(response);
+                res.send();
+            }
+        });
+}
+exports.feedback_example = function(req, res) {
+    console.log("here");
+    var params = {
+        workspace_id: workspace_id,
+        intent: 'hello',
+        text: 'Howdy!'
+    };
+
+    assistant.createExample(params, function(err, response) {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log(JSON.stringify(response, null, 2));
+        }
+    });
 }
 exports.test_message = function(req, res) {
 
