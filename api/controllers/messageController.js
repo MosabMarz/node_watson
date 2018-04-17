@@ -6,7 +6,7 @@ var auth = require('../models/auth.js'); // you'll have to edit this file to inc
 var assistant = new watson.AssistantV1(auth.conversation);
 const workspace_id = '220d6c23-754f-49d3-9fd0-7b9216f8e7ff';
 
-
+//get user message to watson
 exports.message = function(req, res) {
     let message = req.body.message;
     assistant.message({
@@ -58,8 +58,9 @@ exports.message = function(req, res) {
         }
     });
 }
+
+//enter feedback example for user input
 exports.feedback = function(req, res) {
-    console.log("feedback here");
     let message = req.body.message;
     let intent = req.body.intent;
 
@@ -81,41 +82,32 @@ exports.feedback = function(req, res) {
             }
         });
 }
-exports.feedback_example = function(req, res) {
-    console.log("here");
-    var params = {
-        workspace_id: workspace_id,
-        intent: 'hello',
-        text: 'Howdy!'
-    };
 
-    assistant.createExample(params, function(err, response) {
-        if (err) {
-            console.error(err);
-        } else {
-            console.log(JSON.stringify(response, null, 2));
-        }
-    });
+//enter new intent for watson with 1 example 
+exports.create_intent = function(req, res) {
+    let example = req.body.example;
+    let intent = req.body.intent;
+var params = {
+    workspace_id: workspace_id,
+    intent: intent,
+    examples: [
+      {
+        text: example
+      }
+    ]
+  };
+  
+  assistant.createIntent(params, function(err, response) {
+    if (err) {
+      console.error(err);
+      res.status(404);
+      res.send();
+    } else {
+      console.log(JSON.stringify(response, null, 2));
+      res.send(response);
+    }
+  });
 }
-exports.test_message = function(req, res) {
-
-    assistant.message({
-        workspace_id: '220d6c23-754f-49d3-9fd0-7b9216f8e7ff',
-        input: { 'text': 'نقاطي زي الزفت يا زفت' }
-    }, function(err, response) {
-        if (err)
-            console.log('error:', err);
-        else {
-            if (response.intents[0].confidence > 0.49) {
-                let reply = {
-                    "reply": response.output.text[0],
-                    "intent": response.intents[0].intent,
-                    "confidence": response.intents[0].confidence
-                }
-                res.send(reply);
-            }
-        }
-    });
-
-
+exports.counter_example = function(req, res) {
+    
 }
